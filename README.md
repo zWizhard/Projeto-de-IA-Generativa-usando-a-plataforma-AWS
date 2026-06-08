@@ -36,22 +36,32 @@ A IA **nunca** gera nem executa SQL — ela só interpreta a pergunta.
 
 ```
 projeto_IA/
-├── app.py               # Interface Streamlit
-├── bedrock_client.py    # Cliente do Amazon Bedrock (SSO + interpretação de intenção)
-├── database.py          # Conexão, introspecção, VIEW e consultas seguras
-├── chatbot.py           # Orquestração pergunta -> intenção -> consulta -> resposta
-├── prompts.py           # Prompt de sistema e few-shot do classificador
-├── config.py            # Carrega variáveis de ambiente e o escopo do projeto
-├── setup_view.py        # CLI: inspeciona o banco e cria/valida a VIEW vw_escopo_ia
-├── requirements.txt
-├── README.md
-├── .env.example         # Modelo de configuração (sem credenciais)
-├── .gitignore
-├── relatorio/           # Relatório técnico em LaTeX
+├── src/                     # Código-fonte da aplicação
+│   ├── app.py               # Interface Streamlit
+│   ├── bedrock_client.py    # Cliente do Amazon Bedrock (SSO + intenção + NL->SQL)
+│   ├── chatbot.py           # Orquestração pergunta -> intenção -> consulta -> resposta
+│   ├── database.py          # Conexão, introspecção, VIEW e consultas seguras
+│   ├── prompts.py           # Prompts do classificador e do gerador de SQL
+│   ├── config.py            # Carrega variáveis de ambiente e o escopo do projeto
+│   └── setup_view.py        # CLI: inspeciona o banco e cria/valida a VIEW vw_escopo_ia
+├── scripts/                 # Utilitários autônomos (apenas boto3)
+│   ├── get_bedrock_creds.py # Obtém credenciais temporárias do Bedrock (SSO)
+│   └── test_bedrock.py      # Teste rápido do Bedrock
+├── tests/
+│   └── test_database.py     # Testes (segurança offline + integração)
+├── relatorio/               # Relatório técnico em LaTeX (IESB/abntex2)
 │   ├── main.tex
-│   └── referencias.bib
-└── tests/
-    └── test_database.py
+│   ├── main.pdf
+│   ├── referencias.bib
+│   └── Figuras/
+├── docs/                    # Material de apoio (template original do relatório)
+├── .env                     # Configuração real (repo PRIVADO) — não publicar
+├── .env.example             # Modelo de configuração (sem credenciais)
+├── .gitignore
+├── pytest.ini
+├── requirements.txt
+├── executar.bat             # Atalho de execução (Windows)
+└── README.md
 ```
 
 ## 4. Configuração do ambiente
@@ -111,33 +121,33 @@ navegador abre para login; as credenciais ficam em cache (~8h) em
 
 ```bash
 # Teste rápido do Bedrock (script original do curso):
-python test_bedrock.py "O que é computação em nuvem?"
+python scripts/test_bedrock.py "O que é computação em nuvem?"
 
 # Teste do classificador de intenção do chatbot:
-python bedrock_client.py "Qual UF tem mais matrículas?"
+python src/bedrock_client.py "Qual UF tem mais matrículas?"
 ```
 
 ## 7. Como executar
 
 ```bash
 # 1. (Recomendado) inspecione o banco e crie/valide a VIEW
-python setup_view.py
+python src/setup_view.py
 
 # 2. Suba a interface (use sempre "python -m streamlit")
-python -m streamlit run app.py
+python -m streamlit run src/app.py
 ```
 
 > **No Windows, com duplo clique:** basta executar o arquivo `executar.bat`.
 >
-> **Importante:** use `python -m streamlit run app.py` (e não apenas
-> `streamlit run app.py`). O atalho `streamlit` pode não estar no PATH do
+> **Importante:** use `python -m streamlit run src/app.py` (e não apenas
+> `streamlit run ...`). O atalho `streamlit` pode não estar no PATH do
 > sistema, resultando em *"'streamlit' não é reconhecido como comando"*. Rodar
 > via `python -m streamlit` evita esse problema.
 
 Também é possível usar o chatbot pelo terminal:
 
 ```bash
-python chatbot.py "Quantas matrículas existem no ensino fundamental por UF?"
+python src/chatbot.py "Quantas matrículas existem no ensino fundamental por UF?"
 ```
 
 ## 8. Exemplos de perguntas

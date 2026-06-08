@@ -20,14 +20,20 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List, Optional
+
+# Raiz do projeto = pasta-pai de src/ (onde fica o arquivo .env).
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 try:
     # python-dotenv é opcional em produção (as variáveis podem vir do ambiente),
-    # mas facilita muito o desenvolvimento local.
+    # mas facilita o desenvolvimento local. Carrega o .env da raiz do projeto,
+    # independentemente do diretório de trabalho atual.
     from dotenv import load_dotenv
 
-    load_dotenv()
+    _env_path = PROJECT_ROOT / ".env"
+    load_dotenv(_env_path if _env_path.exists() else None)
 except Exception:  # pragma: no cover - ambiente sem python-dotenv
     pass
 
