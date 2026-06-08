@@ -1,0 +1,32 @@
+# Segredos / credenciais
+# OBS.: o .env É versionado intencionalmente (repositório PRIVADO) para rodar
+# direto na máquina acadêmica. Em repositório público, remova o .env do Git!
+logins.csv
+*.pem
+.bedrock_creds.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# LaTeX (artefatos de compilação)
+relatorio/*.aux
+relatorio/*.log
+relatorio/*.out
+relatorio/*.toc
+relatorio/*.bbl
+relatorio/*.blg
+relatorio/*.synctex.gz
+relatorio/*.fls
+relatorio/*.fdb_latexmk
+
+# SO / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,21 @@
+# Dependências do projeto Chatbot INEP / Censo Escolar
+
+# Interface web
+streamlit>=1.33
+
+# Amazon Bedrock / AWS
+boto3>=1.34
+
+# Banco de dados (agnóstico via SQLAlchemy)
+SQLAlchemy>=2.0
+psycopg2-binary>=2.9     # driver PostgreSQL (banco utilizado no projeto)
+# pymysql>=1.1           # descomente se for usar MySQL/MariaDB
+
+# Manipulação de dados / tabelas na interface
+pandas>=2.0
+
+# Configuração via .env
+python-dotenv>=1.0
+
+# Testes
+pytest>=8.0

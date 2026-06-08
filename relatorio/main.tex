@@ -1,0 +1,695 @@
+% ==========================================================
+% RELATÓRIO TÉCNICO - IESB (Template oficial abntex2)
+% Adaptado para o projeto: Chatbot INEP/Censo Escolar com Amazon Bedrock
+%
+% Compilação (MiKTeX/TeXLive):
+%   pdflatex main.tex
+%   bibtex main
+%   pdflatex main.tex
+%   pdflatex main.tex
+% ==========================================================
+
+\documentclass[
+    12pt,
+    oneside,
+    a4paper,
+    chapter=TITLE,
+    section=TITLE
+]{abntex2}
+
+% ----------------------------------------------------------
+% PACOTES
+% ----------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage{indentfirst}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+
+% ----------------------------------------------------------
+% CITAÇÕES E REFERÊNCIAS ABNT
+% ----------------------------------------------------------
+\usepackage[alf]{abntex2cite}
+
+% ----------------------------------------------------------
+% CORES
+% ----------------------------------------------------------
+\definecolor{iesbRed}{RGB}{170,0,0}
+\definecolor{codegray}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{0,128,0}
+\definecolor{codekw}{RGB}{0,0,180}
+\definecolor{codestr}{RGB}{150,0,0}
+
+% ----------------------------------------------------------
+% CONFIGURAÇÃO DE CÓDIGOS (com suporte a acentos via literate)
+% ----------------------------------------------------------
+\lstset{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{codecomment}\itshape,
+    keywordstyle=\color{codekw}\bfseries,
+    stringstyle=\color{codestr},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny,
+    literate=%
+      {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+      {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+      {â}{{\^a}}1 {ê}{{\^e}}1 {ô}{{\^o}}1 {Â}{{\^A}}1 {Ê}{{\^E}}1
+      {ã}{{\~a}}1 {õ}{{\~o}}1 {Ã}{{\~A}}1 {Õ}{{\~O}}1
+      {ç}{{\c c}}1 {Ç}{{\c C}}1 {à}{{\`a}}1 {ü}{{\"u}}1
+}
+
+% ----------------------------------------------------------
+% CAMPOS INSTITUCIONAIS (EDITAR AQUI)
+% ----------------------------------------------------------
+\newcommand{\iesbcurso}{Graduação em Ciência de Dados e Inteligência Artificial}
+\newcommand{\iesbdisciplina}{Integração de Técnicas e Projeto de Sistemas Inteligentes}
+\newcommand{\iesbsemestre}{2026/1}
+\newcommand{\iesbautor}{Eduardo Gonçalves Barbosa}
+\newcommand{\iesbdocente}{Sérgio da Costa Côrtes}
+\newcommand{\iesbtitulo}{Projeto de IAGEN: Chatbot com IA Generativa (Amazon Bedrock) para Consulta em Linguagem Natural à Base do INEP/Censo Escolar}
+
+% ----------------------------------------------------------
+% DADOS ABNTEX
+% ----------------------------------------------------------
+\titulo{\iesbtitulo}
+\autor{\iesbautor}
+\orientador{\iesbdocente}
+\local{Brasília -- DF}
+\data{2026}
+
+\instituicao{
+Centro Universitário IESB\\
+Graduação em Ciência de Dados e Inteligência Artificial
+}
+
+\tipotrabalho{Relatório Técnico}
+
+% ----------------------------------------------------------
+% LAYOUT INSTITUCIONAL (CABEÇALHO/RODAPÉ)
+% ----------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize IESB • \iesbcurso}
+\fancyhead[R]{\footnotesize \thepage}
+\fancyfoot[L]{\footnotesize \iesbdisciplina\ • \iesbsemestre}
+\fancyfoot[R]{\footnotesize \iesbautor}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\headheight}{14.5pt}
+
+% ==========================================================
+% INÍCIO DO DOCUMENTO
+% ==========================================================
+\begin{document}
+
+\pagenumbering{arabic}
+\pagestyle{empty}
+
+% ==========================================================
+% CAPA
+% ==========================================================
+\begin{capa}
+\centering
+
+\includegraphics[width=0.22\textwidth]{Figuras/IESB_logo.png}
+
+\vspace{1.5cm}
+
+{\Large\bfseries CENTRO UNIVERSITÁRIO IESB}
+
+\vspace{0.5cm}
+
+{\large Graduação em Ciência de Dados e Inteligência Artificial}
+
+\vfill
+
+{\color{iesbRed}\bfseries\Huge RELATÓRIO TÉCNICO}
+
+\vspace{1cm}
+
+{\Large \iesbtitulo}
+
+\vfill
+
+{\large Autor: \iesbautor}
+
+\vspace{0.3cm}
+
+{\large Docente: \iesbdocente}
+
+\vspace{0.3cm}
+
+{\normalsize Disciplina: \iesbdisciplina}
+
+\vfill
+
+Brasília -- DF\\
+2026
+
+\end{capa}
+
+% ----------------------------------------------------------
+% FOLHA DE ROSTO
+% ----------------------------------------------------------
+\folhaderosto*
+
+% ----------------------------------------------------------
+% RESUMO
+% ----------------------------------------------------------
+\begin{resumo}
+
+Este relatório técnico apresenta o desenvolvimento de um \textit{chatbot} acadêmico capaz de
+responder, em linguagem natural, perguntas sobre a base educacional do INEP/Censo Escolar. A
+solução utiliza o serviço de IA generativa \textbf{Amazon Bedrock} (modelo \textit{LLaMA 4 Scout})
+exclusivamente como \textbf{classificador de intenções}, devolvendo um JSON controlado, enquanto a
+execução das consultas é realizada por \textbf{funções Python seguras e somente leitura} sobre um
+banco \textbf{PostgreSQL}. O sistema inspeciona a estrutura real das tabelas, descobre os
+relacionamentos a partir das chaves estrangeiras (sem inventar chaves) e consolida o escopo
+definido pelo docente em uma consulta/visão denominada \texttt{vw\_escopo\_ia}. A interface é
+construída em \textbf{Streamlit}. São discutidas a arquitetura, as decisões de segurança contra
+injeção de SQL, as dificuldades encontradas e os resultados obtidos com dados reais do Censo
+Escolar de 2025.
+
+\vspace{\onelineskip}
+
+\noindent
+\textbf{Palavras-chave}: chatbot. inteligência artificial generativa. amazon bedrock. censo escolar. linguagem natural. postgresql.
+
+\end{resumo}
+
+% ----------------------------------------------------------
+% SUMÁRIO E LISTAS
+% ----------------------------------------------------------
+\tableofcontents*
+\listoffigures*
+\listoftables*
+
+% ==========================================================
+% INÍCIO DO TEXTO (NUMERAÇÃO ATIVA)
+% ==========================================================
+\cleardoublepage
+\pagestyle{fancy}
+\textual
+
+% ==========================================================
+\chapter{Introdução}
+
+A consulta a grandes bases de dados governamentais, como as do Instituto Nacional de Estudos e
+Pesquisas Educacionais Anísio Teixeira (INEP), normalmente exige conhecimento técnico de SQL e da
+modelagem das tabelas. Isso cria uma barreira para usuários não especialistas que desejam apenas
+obter informações como o total de matrículas por região ou a distribuição de estudantes por
+raça/cor.
+
+Os avanços recentes em Inteligência Artificial Generativa permitem traduzir a intenção de perguntas
+escritas em linguagem natural para ações estruturadas. Este projeto emprega o Amazon
+Bedrock~\cite{aws_bedrock} para interpretar perguntas e um conjunto de funções Python seguras para
+executar as consultas, conciliando usabilidade (linguagem natural) e segurança (a IA nunca executa
+SQL).
+
+\section{Objetivo Geral}
+Desenvolver um \textit{chatbot} com IA generativa, integrado ao Amazon Bedrock e conectado a um
+banco de dados educacional, capaz de responder perguntas em linguagem natural sobre dados do
+INEP/Censo Escolar, respeitando o escopo de tabelas e variáveis definido pelo docente.
+
+\section{Objetivos Específicos}
+\begin{enumerate}[itemsep=2pt]
+  \item Conectar o projeto Python ao Amazon Bedrock.
+  \item Conectar o projeto Python ao banco de dados PostgreSQL.
+  \item Identificar, por introspecção, a estrutura real das tabelas indicadas.
+  \item Realizar a junção entre as tabelas \texttt{inep\_censo\_escolar}, \texttt{municipio},
+        \texttt{unidade\_federacao} e \texttt{regiao}.
+  \item Criar/validar uma consulta consolidada (visão) \texttt{vw\_escopo\_ia}.
+  \item Permitir perguntas em linguagem natural e interpretá-las via Bedrock.
+  \item Executar consultas seguras (somente leitura) e retornar respostas claras.
+  \item Construir uma interface simples em Streamlit.
+  \item Documentar o projeto neste relatório técnico.
+\end{enumerate}
+
+\section{Justificativa}
+O projeto justifica-se por três frentes. Do ponto de vista \textbf{educacional}, democratiza o
+acesso a indicadores do Censo Escolar para gestores, pesquisadores e estudantes sem exigir domínio
+de SQL. Do ponto de vista \textbf{técnico}, demonstra um padrão arquitetural seguro de integração
+entre Modelos de Linguagem (LLMs) e bancos de dados, no qual o modelo apenas classifica a intenção e
+o código executa consultas validadas, mitigando riscos de injeção de SQL. Do ponto de vista
+\textbf{acadêmico}, exercita conceitos de IA generativa, modelagem dimensional, introspecção de
+esquemas e boas práticas de engenharia de software.
+
+% ==========================================================
+\chapter{Fundamentação Teórica}
+
+\section{Chatbots}
+\textit{Chatbots} são sistemas que conversam com usuários em linguagem natural. Os de geração mais
+recente apoiam-se em LLMs para compreender intenção e gerar respostas, superando abordagens baseadas
+apenas em regras fixas.
+
+\section{Inteligência Artificial Generativa}
+A IA generativa baseia-se em redes \textit{Transformer}~\cite{vaswani2017attention}, capazes de
+modelar dependências de longo alcance em texto. LLMs como a família \textit{LLaMA}~\cite{llama} são
+treinados para prever o próximo \textit{token} e, com instruções adequadas (\textit{prompt
+engineering}), podem ser direcionados a tarefas específicas, como a classificação de intenções.
+
+\section{Amazon Bedrock}
+O Amazon Bedrock~\cite{aws_bedrock} é um serviço gerenciado da AWS que oferece acesso, via API, a
+modelos de fundação de diversos provedores. Neste projeto utilizou-se o modelo
+\texttt{us.meta.llama4-scout-17b-instruct-v1:0} por meio da \textit{Converse
+API}~\cite{aws_bedrock_converse}, com \textit{fallback} para \texttt{invoke\_model}. O acesso é
+autenticado pelo AWS IAM Identity Center (SSO).
+
+\section{Bancos de Dados Relacionais e Modelagem Dimensional}
+Bancos relacionais organizam dados em tabelas relacionadas por chaves primárias e estrangeiras. A
+modelagem dimensional separa \textbf{tabelas-fato} (medidas, como a quantidade de matrículas) de
+\textbf{tabelas-dimensão} (atributos descritivos, como o nome do município). Esse padrão orienta a
+junção realizada neste trabalho.
+
+\section{Linguagem Natural Aplicada à Consulta de Dados (NL2SQL)}
+A tradução de linguagem natural para consultas estruturadas é tema clássico de
+pesquisa~\cite{zhong2017seq2sql,yu2018spider}. Em vez de gerar SQL livremente com o LLM (o que é
+arriscado), adotou-se uma estratégia de classificação de intenção: o modelo escolhe uma ação dentre
+um conjunto fixo e seguro, e o SQL é montado por código auditável.
+
+\section{Dados Educacionais: INEP e Censo Escolar}
+O Censo Escolar~\cite{inep_censo} é o principal levantamento estatístico da educação básica
+brasileira, coletado anualmente pelo INEP. Contém variáveis sobre escolas, matrículas, docentes e
+infraestrutura, servindo de base para políticas públicas e indicadores educacionais.
+
+\section{Segurança na Geração de Consultas}
+A injeção de SQL figura entre as principais vulnerabilidades de aplicações~\cite{owasp2021}. As
+defesas adotadas neste trabalho incluem: separação entre interpretação (IA) e execução (código),
+consultas parametrizadas, \textit{allowlist} de tabelas, validação de identificadores contra o
+esquema real e transações somente leitura.
+
+% ==========================================================
+\chapter{Escopo do Projeto e Metodologia}
+
+\section{Metodologia}
+O desenvolvimento seguiu as etapas: (i) configuração do acesso ao Amazon Bedrock e ao banco;
+(ii) inspeção da estrutura real das tabelas do escopo; (iii) descoberta dos relacionamentos por
+chaves estrangeiras; (iv) construção da consulta consolidada \texttt{vw\_escopo\_ia};
+(v) implementação das funções seguras de consulta; (vi) integração com o Bedrock como classificador
+de intenções; (vii) construção da interface em Streamlit; e (viii) testes automatizados e validação
+com dados reais.
+
+\section{Escopo Definido pelo Professor}
+O escopo do trabalho foi definido pelo docente da disciplina, que indicou as tabelas e as variáveis
+a serem utilizadas. \textbf{Toda a modelagem deste projeto seguiu estritamente esse escopo}.
+
+\section{Tabelas Utilizadas}
+\begin{itemize}[itemsep=1pt]
+  \item \texttt{inep\_censo\_escolar} --- tabela principal (fato);
+  \item \texttt{municipio} --- dimensão (nome do município);
+  \item \texttt{unidade\_federacao} --- dimensão (nome/sigla da UF);
+  \item \texttt{regiao} --- dimensão (nome da região);
+  \item \texttt{inep\_censo\_escolar\_matricula} --- tabela-detalhe das matrículas,
+        identificada durante a inspeção (Seção~\ref{sec:juncao}).
+\end{itemize}
+
+\section{Variáveis Selecionadas}
+\label{sec:variaveis}
+As variáveis priorizadas pelo docente são apresentadas na Tabela~\ref{tab:variaveis}.
+
+\begin{table}[H]
+\centering
+\caption{Variáveis do escopo e tabela de origem (após inspeção do banco).}
+\label{tab:variaveis}
+\begin{tabular}{lll}
+\toprule
+\textbf{Variável} & \textbf{Descrição} & \textbf{Tabela de origem} \\
+\midrule
+TP\_CATEGORIA\_ESCOLA\_PRIVADA & Categoria da escola privada & inep\_censo\_escolar \\
+TP\_LOCALIZACAO & Localização (urbana/rural) & inep\_censo\_escolar \\
+TP\_LOCALIZACAO\_DIFERENCIADA & Localização diferenciada & inep\_censo\_escolar \\
+QT\_MAT\_INF & Matrículas - Ed. Infantil & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_FUND & Matrículas - Ens. Fundamental & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_MED & Matrículas - Ens. Médio & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_FEM & Matrículas femininas & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_MASC & Matrículas masculinas & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_ND & Raça/cor não declarada & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_BRANCA & Raça/cor branca & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_PRETA & Raça/cor preta & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_PARDA & Raça/cor parda & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_AMARELA & Raça/cor amarela & inep\_censo\_escolar\_matricula \\
+QT\_MAT\_BAS\_INDIGENA & Raça/cor indígena & inep\_censo\_escolar\_matricula \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Processo de Junção das Tabelas}
+\label{sec:juncao}
+
+\subsection{Inspeção da Estrutura Real}
+Antes de qualquer junção, o sistema inspecionou a estrutura real do banco (PostgreSQL 17.4,
+\textit{host} \texttt{bigdata.dataiesb.com}, base \texttt{iesb}, esquema \texttt{public}). A
+inspeção revelou um achado importante: as variáveis de matrícula (\texttt{QT\_MAT\_*}) não estão em
+\texttt{inep\_censo\_escolar} (302 colunas), mas na tabela-detalhe
+\texttt{inep\_censo\_escolar\_matricula} (237 colunas), relacionada à fato por
+(\texttt{nu\_ano\_censo}, \texttt{co\_entidade}). Já as variáveis \texttt{TP\_*} estão na própria
+tabela \texttt{inep\_censo\_escolar}. Por isso, a tabela de matrículas foi incorporada à junção,
+para que o escopo do professor fosse plenamente atendido.
+
+\subsection{Relacionamentos Identificados (Chaves Reais)}
+Os relacionamentos foram descobertos a partir das chaves estrangeiras declaradas no banco, sem
+inventar nomes. A Tabela~\ref{tab:chaves} resume as ligações.
+
+\begin{table}[H]
+\centering
+\caption{Relacionamentos descobertos por introspecção.}
+\label{tab:chaves}
+\begin{tabular}{lll}
+\toprule
+\textbf{Origem} & \textbf{Coluna(s)} & \textbf{Destino} \\
+\midrule
+inep\_censo\_escolar\_matricula & (nu\_ano\_censo, co\_entidade) & inep\_censo\_escolar \\
+inep\_censo\_escolar & co\_municipio & municipio.codigo\_municipio\_dv \\
+municipio & cd\_uf & unidade\_federacao.cd\_uf \\
+unidade\_federacao & cd\_regiao & regiao.cd\_regiao \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Criação da VIEW \texttt{vw\_escopo\_ia}}
+A consulta consolidada reúne o nome do município, da UF e da região, além das variáveis do escopo. O
+Código~\ref{lst:view} mostra o SELECT gerado automaticamente pelo sistema.
+
+\begin{lstlisting}[language=SQL, caption={Definição da visão vw\_escopo\_ia.}, label=lst:view]
+CREATE OR REPLACE VIEW vw_escopo_ia AS
+SELECT
+  m.nome_municipio              AS nome_municipio,
+  u.sigla_uf                    AS sigla_uf,
+  u.nome_uf                     AS nome_uf,
+  r.nome_regiao                 AS nome_regiao,
+  f.tp_categoria_escola_privada AS tp_categoria_escola_privada,
+  f.tp_localizacao              AS tp_localizacao,
+  f.tp_localizacao_diferenciada AS tp_localizacao_diferenciada,
+  mat.qt_mat_inf                AS qt_mat_inf,
+  mat.qt_mat_fund               AS qt_mat_fund,
+  mat.qt_mat_med                AS qt_mat_med,
+  mat.qt_mat_bas_fem            AS qt_mat_bas_fem,
+  mat.qt_mat_bas_masc           AS qt_mat_bas_masc,
+  mat.qt_mat_bas_nd             AS qt_mat_bas_nd,
+  mat.qt_mat_bas_branca         AS qt_mat_bas_branca,
+  mat.qt_mat_bas_preta          AS qt_mat_bas_preta,
+  mat.qt_mat_bas_parda          AS qt_mat_bas_parda,
+  mat.qt_mat_bas_amarela        AS qt_mat_bas_amarela,
+  mat.qt_mat_bas_indigena       AS qt_mat_bas_indigena
+FROM inep_censo_escolar f
+LEFT JOIN inep_censo_escolar_matricula mat
+       ON mat.nu_ano_censo = f.nu_ano_censo AND mat.co_entidade = f.co_entidade
+LEFT JOIN municipio          m ON f.co_municipio = m.codigo_municipio_dv
+LEFT JOIN unidade_federacao  u ON m.cd_uf        = u.cd_uf
+LEFT JOIN regiao             r ON u.cd_regiao    = r.cd_regiao;
+\end{lstlisting}
+
+\subsection{Visão Física x Visão Lógica}
+O usuário de banco disponibilizado (\texttt{data\_iesb}) possui acesso somente leitura: a tentativa
+de criar a visão física resultou em \texttt{permission denied for schema public}. Para contornar a
+limitação sem perder funcionalidade, o sistema opera por padrão em modo \textbf{visão lógica}: a
+mesma definição do Código~\ref{lst:view} é utilizada como subconsulta, mantendo o comportamento
+100\% somente leitura. Caso o projeto seja executado com um usuário que tenha permissão de escrita,
+a visão física é criada automaticamente. Essa decisão, além de pragmática, reforça a postura de
+segurança do sistema.
+
+% ==========================================================
+\chapter{Desenvolvimento e Arquitetura}
+
+\section{Arquitetura do Sistema}
+A Figura~\ref{fig:arq} ilustra o fluxo. A interface (Streamlit) envia a pergunta ao módulo de
+orquestração (\texttt{chatbot.py}), que aciona o Bedrock (\texttt{bedrock\_client.py}) para obter a
+intenção em JSON e, então, chama a função segura correspondente em \texttt{database.py}. O resultado
+é formatado e devolvido ao usuário.
+
+\begin{figure}[H]
+\centering
+\setlength{\fboxsep}{8pt}
+\fbox{\begin{minipage}{0.9\textwidth}\centering\ttfamily\small
+Usuário (Streamlit / app.py)\\
+$\downarrow$ pergunta em linguagem natural\\
+chatbot.py (orquestração)\\
+$\downarrow$ \hspace{1.5cm} $\uparrow$ JSON de intenção\\
+bedrock\_client.py $\leftrightarrow$ Amazon Bedrock (LLaMA)\\
+$\downarrow$ ação + parâmetros\\
+database.py (funções seguras, somente leitura)\\
+$\downarrow$ SELECT validado\\
+PostgreSQL (vw\_escopo\_ia / visão lógica)\\
+$\downarrow$ dados\\
+Resposta formatada ao usuário
+\end{minipage}}
+\caption{Arquitetura e fluxo de dados do chatbot.}
+\label{fig:arq}
+\end{figure}
+
+\section{Tecnologias Utilizadas}
+\begin{itemize}[itemsep=1pt]
+  \item Python 3.12;
+  \item Streamlit~\cite{streamlit} --- interface web;
+  \item Amazon Bedrock~\cite{aws_bedrock} via boto3~\cite{boto3};
+  \item PostgreSQL 17~\cite{postgresql} com SQLAlchemy~\cite{sqlalchemy} e \texttt{psycopg2};
+  \item pandas (exibição de tabelas) e python-dotenv (configuração).
+\end{itemize}
+
+\section{Integração com o Amazon Bedrock}
+A autenticação usa o IAM Identity Center (SSO): no primeiro uso, o navegador abre para login e as
+credenciais temporárias ficam em cache (cerca de 8 horas). A região do \texttt{bedrock-runtime} é
+configurável (padrão \texttt{us-east-2}); o login SSO ocorre em \texttt{us-east-1}. O \textit{prompt}
+de sistema instrui o modelo a retornar apenas JSON, escolhendo uma ação de uma lista fixa
+(Código~\ref{lst:prompt}).
+
+\begin{lstlisting}[caption={Trecho do prompt de sistema (classificador de intenções).}, label=lst:prompt]
+Você é um classificador de intenções para um chatbot acadêmico conectado a um
+banco de dados educacional do INEP/Censo Escolar.
+Sua ÚNICA função é interpretar a pergunta e retornar um JSON válido.
+NÃO gere SQL. NÃO explique. Escolha UMA ação da lista permitida.
+Quando o usuário falar em "a base", "censo escolar", "INEP" ou "matrículas",
+considere a base final vw_escopo_ia.
+
+Formato de saída:
+{ "acao": "...", "tabela": "...", "coluna": "...", "filtro": "...", "limite": null }
+\end{lstlisting}
+
+Para a pergunta \textit{``Quantas matrículas existem no ensino fundamental por UF?''}, o modelo
+retorna:
+
+\begin{lstlisting}
+{ "acao": "total_matriculas_por_uf", "tabela": "vw_escopo_ia",
+  "coluna": "QT_MAT_FUND", "filtro": null, "limite": null }
+\end{lstlisting}
+
+\section{Conexão com o Banco de Dados}
+A conexão é feita via SQLAlchemy, montando a URL a partir de variáveis de ambiente (arquivo
+\texttt{.env}), o que mantém as credenciais fora do código. O sistema é agnóstico ao SGBD
+(PostgreSQL, MySQL ou SQLite). A introspecção utiliza o \textit{inspector} do SQLAlchemy para listar
+tabelas, colunas, chaves primárias e estrangeiras.
+
+\section{Funções Implementadas}
+As funções de metadados (\texttt{database.py}) incluem \texttt{conectar\_banco},
+\texttt{listar\_tabelas}, \texttt{contar\_colunas}, \texttt{listar\_colunas},
+\texttt{contar\_registros}, \texttt{descrever\_tabela}, \texttt{mostrar\_amostra},
+\texttt{identificar\_chave\_primaria}, \texttt{identificar\_relacionamentos},
+\texttt{validar\_tabela} e \texttt{validar\_coluna}. As funções do escopo educacional incluem
+\texttt{inspecionar\_tabelas\_escopo}, \texttt{identificar\_chaves\_relacionamento},
+\texttt{criar\_ou\_validar\_view\_escopo\_ia}, \texttt{listar\_variaveis\_escopo}, as consultas de
+total de matrículas por município/UF/região, por etapa de ensino, por gênero, por raça/cor, a
+distribuição por localização, os valores distintos e o resumo estatístico.
+
+\section{Consulta Livre em Linguagem Natural (NL$\rightarrow$SQL)}
+Além das ações estruturadas (determinísticas) do escopo, o sistema possui um modo
+\textbf{NL$\rightarrow$SQL} que permite responder \textbf{qualquer} pergunta sobre os
+\textbf{dados das tabelas do escopo}. Quando a pergunta não corresponde a uma ação
+pré-definida, o classificador retorna a ação \texttt{consulta\_sql} e o fluxo passa a
+ser: (i) o Bedrock recebe o esquema da base consolidada \texttt{vw\_escopo\_ia} e gera
+um comando \texttt{SELECT}; (ii) o Python valida que se trata de uma consulta somente
+leitura e que ela referencia apenas tabelas do escopo (\textit{allowlist}); (iii) como a
+\textit{view} é lógica, ela é injetada como CTE e a consulta é executada; (iv) o Bedrock
+resume o resultado em linguagem natural. Assim, perguntas como \textit{``Qual a média de
+matrículas do ensino médio por município em Goiás?''} são respondidas dinamicamente,
+enquanto perguntas fora do escopo (ex.: PIB, acidentes) são recusadas. Esse modo pode ser
+desativado (\texttt{PERMITIR\_SQL\_LIVRE=false}) ou ampliado para todo o banco
+(\texttt{PERMITIR\_TODAS\_TABELAS=true}) via variáveis de ambiente.
+
+\section{Fluxo de Funcionamento do Chatbot}
+\begin{enumerate}[itemsep=1pt]
+  \item O usuário digita a pergunta na interface.
+  \item \texttt{chatbot.py} envia a pergunta ao Bedrock.
+  \item O Bedrock devolve o JSON de intenção (ação + parâmetros).
+  \item O JSON é normalizado e validado contra a lista de ações permitidas.
+  \item A função segura correspondente em \texttt{database.py} é chamada.
+  \item O resultado é formatado (texto + tabela) e exibido ao usuário.
+\end{enumerate}
+
+% ==========================================================
+\chapter{Resultados e Discussão}
+
+\section{Prints da Execução}
+Os espaços a seguir são reservados para capturas de tela da execução
+(\texttt{streamlit run app.py}).
+
+\begin{figure}[H]
+\centering
+\setlength{\fboxrule}{1pt}\setlength{\fboxsep}{5pt}
+\fbox{\begin{minipage}{0.85\textwidth}\centering\vspace{3.2cm}
+[ Espaço reservado para o print da interface Streamlit ]\vspace{3.2cm}
+\end{minipage}}
+\caption{Tela principal do chatbot.}
+\label{fig:tela}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\setlength{\fboxrule}{1pt}\setlength{\fboxsep}{5pt}
+\fbox{\begin{minipage}{0.85\textwidth}\centering\vspace{3.2cm}
+[ Espaço reservado para o print de uma resposta com tabela ]\vspace{3.2cm}
+\end{minipage}}
+\caption{Exemplo de resposta (matrículas por UF).}
+\label{fig:resp}
+\end{figure}
+
+\section{Testes Realizados}
+Foram implementados testes automatizados com \texttt{pytest} (arquivo
+\texttt{tests/test\_database.py}), divididos em: (i) testes de segurança (\textit{offline}), que
+verificam o bloqueio de comandos destrutivos e a sanitização de parâmetros; e (ii) testes de
+integração, que validam a conexão real, a presença das variáveis do escopo e a coerência das
+agregações. Na execução, todos os 17 testes passaram. Adicionalmente, validou-se o fluxo completo
+(Bedrock + banco) com perguntas reais.
+
+\section{Exemplos de Perguntas e Respostas}
+A Tabela~\ref{tab:exemplos} apresenta perguntas reais e os valores retornados (Censo 2025).
+
+\begin{table}[H]
+\centering
+\caption{Exemplos de perguntas e respostas obtidas com dados reais.}
+\label{tab:exemplos}
+\begin{tabular}{p{6cm} p{8cm}}
+\toprule
+\textbf{Pergunta} & \textbf{Resposta (resumo)} \\
+\midrule
+Qual região possui mais matrículas? & Sudeste: 16.910.475; Nordeste: 11.768.637; Sul: 5.974.917; Norte: 4.340.431; Centro-Oeste: 3.469.368. \\
+\addlinespace
+Matrículas femininas e masculinas? & Feminino: 22.735.128; Masculino: 23.283.252. \\
+\addlinespace
+Matrículas por raça/cor? & Parda: 20.847.435; Branca: 16.044.865; Não declarada: 6.275.577; Preta: 2.301.626; Indígena: 381.498; Amarela: 167.379. \\
+\addlinespace
+Distribuição por localização? & Urbana: 144.217 escolas / 37.869.396 matrículas; Rural: 69.975 escolas / 4.594.432 matrículas. \\
+\addlinespace
+Quantas colunas tem a base? & A base \texttt{vw\_escopo\_ia} possui 18 colunas. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Dificuldades Encontradas}
+\begin{itemize}[itemsep=2pt]
+  \item \textbf{Variáveis em duas tabelas:} as \texttt{QT\_MAT\_*} não estavam na tabela principal,
+        e sim em \texttt{inep\_censo\_escolar\_matricula}; resolvido incorporando essa tabela à junção.
+  \item \textbf{Acesso somente leitura:} não foi possível criar a visão física; adotou-se a visão
+        lógica (subconsulta equivalente).
+  \item \textbf{Saída do LLM:} modelos abertos podem incluir texto extra junto ao JSON; implementou-se
+        extração robusta do primeiro bloco JSON balanceado e \textit{fallback} para
+        \texttt{pergunta\_nao\_suportada}.
+  \item \textbf{Maiúsculas/minúsculas:} divergência entre o escopo (nomes em maiúsculas) e o banco
+        (minúsculas), tratada por resolução \textit{case-insensitive} e \textit{quoting} de identificadores.
+  \item \textbf{Valores já textuais:} colunas como \texttt{TP\_LOCALIZACAO} retornam ``Urbana''/``Rural''
+        (texto), exigindo rotulagem condicional.
+\end{itemize}
+
+\section{Resultados Obtidos}
+O chatbot respondeu corretamente, com dados reais, a perguntas de metadados e do escopo educacional.
+A base consolidada possui 18 colunas e abrange 214.192 escolas (Censo 2025). As agregações por
+região, UF, etapa, gênero e raça/cor foram validadas. A separação entre interpretação (IA) e
+execução (código) mostrou-se eficaz, segura e de fácil manutenção.
+
+\section{Limitações do Projeto}
+\begin{itemize}[itemsep=1pt]
+  \item O conjunto de perguntas é limitado às ações pré-definidas (não há SQL livre).
+  \item Filtros compostos (ex.: ``matrículas no Sudeste em escolas rurais'') ainda são limitados.
+  \item Depende de credenciais válidas de AWS/SSO e de conectividade com o banco remoto.
+  \item A qualidade da classificação depende do modelo de fundação utilizado.
+\end{itemize}
+
+\section{Possibilidades de Melhoria}
+\begin{itemize}[itemsep=1pt]
+  \item Suporte a filtros combinados (UF + localização + etapa) na intenção.
+  \item Geração de gráficos automáticos na interface.
+  \item Cache de respostas e memória de contexto conversacional.
+  \item Avaliação quantitativa da acurácia de classificação de intenções.
+  \item Exportação de resultados (CSV/Excel) e \textit{logging} de auditoria.
+\end{itemize}
+
+% ==========================================================
+\chapter{Conclusão}
+
+O projeto atingiu os objetivos propostos: um chatbot funcional, integrado ao Amazon Bedrock e
+conectado a um banco PostgreSQL real, capaz de responder em linguagem natural a perguntas sobre o
+INEP/Censo Escolar, dentro do escopo definido pelo docente. A arquitetura adotada --- IA apenas para
+interpretar a intenção e código auditável para executar consultas seguras --- equilibra usabilidade
+e segurança, constituindo um padrão replicável para integração entre LLMs e bancos de dados. As
+dificuldades reais encontradas (variáveis em duas tabelas e acesso somente leitura) foram
+contornadas de forma documentada, reforçando o caráter prático e seguro da solução.
+
+% ==========================================================
+% REFERÊNCIAS ABNT
+% ==========================================================
+\postextual
+\bibliography{referencias}
+
+% ==========================================================
+% APÊNDICES
+% ==========================================================
+\begin{apendicesenv}
+
+\partapendices
+
+\chapter{Trechos Principais do Código}
+
+\section{Descoberta de Relacionamentos (sem inventar chaves)}
+\begin{lstlisting}[language=Python]
+def _achar_fk(insp, tabela, alvo_lower):
+    """Retorna a primeira FK de tabela que referencia a tabela alvo."""
+    for fk in insp.get_foreign_keys(tabela, schema=config.DB_SCHEMA):
+        if (fk.get("referred_table") or "").lower() == alvo_lower:
+            return fk
+    return None
+\end{lstlisting}
+
+\section{Guarda de Segurança (somente leitura)}
+\begin{lstlisting}[language=Python]
+_DESTRUTIVO = re.compile(
+    r"\b(DROP|DELETE|UPDATE|INSERT|ALTER|TRUNCATE|GRANT|REVOKE|CREATE|"
+    r"REPLACE|MERGE|CALL|EXECUTE|COPY)\b", re.IGNORECASE)
+
+def _assert_select_only(sql):
+    limpo = sql.strip().lstrip("(").strip()
+    if not re.match(r"^(SELECT|WITH)\b", limpo, re.IGNORECASE):
+        raise BancoError("Consulta bloqueada: apenas SELECT e permitido.")
+    if _DESTRUTIVO.search(sql):
+        raise BancoError("Consulta bloqueada: comando destrutivo detectado.")
+\end{lstlisting}
+
+\section{Agregação Segura de Matrículas por Grupo}
+\begin{lstlisting}[language=Python]
+def _agrupar_matriculas(coluna_grupo, limite=None, coluna_etapa=None):
+    fonte = _fonte_escopo()                 # visao fisica ou subconsulta logica
+    grupo_q = _quote(_colunas_existentes([coluna_grupo])[0])
+    medida = (f"SUM(COALESCE({_quote(coluna_etapa)},0))" if coluna_etapa
+              else f"SUM({_soma_total_matriculas_sql()})")
+    sql = (f"SELECT {grupo_q} AS grupo, {medida} AS total_matriculas "
+           f"FROM {fonte} WHERE {grupo_q} IS NOT NULL "
+           f"GROUP BY {grupo_q} ORDER BY total_matriculas DESC NULLS LAST")
+    # ... LIMIT parametrizado e execucao somente leitura ...
+\end{lstlisting}
+
+\end{apendicesenv}
+
+\end{document}
